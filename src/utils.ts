@@ -121,10 +121,12 @@ export function findEntrypointsInExtensions(
 ): string[] {
     let entrypoints: string[] = [];
     extensions.forEach((extension) => {
-        const file = join(extension.path, entrypointFile);
+        let file = join(extension.path, entrypointFile);
         if (!fs.existsSync(file)) {
             return;
         }
+        // Resolve symlinks to avoid duplicate entrypoints when extensions are linked via composer path repositories
+        file = fs.realpathSync(file);
         const patterns = readJsonFile(file).map((pattern: string) =>
             resolve(dirname(file), pattern),
         );
